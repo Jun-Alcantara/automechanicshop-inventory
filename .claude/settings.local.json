@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh pr:*)",
+      "Bash(git checkout:*)",
+      "Bash(git fetch:*)",
+      "Bash(git merge:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(npm install:*)",
+      "Bash(eas login:*)",
+      "Bash(./gradlew assembleDebug)",
+      "Read(//c/Program Files/CMake/bin//**)",
+      "Read(//c/Program Files/CMake/share//**)",
+      "Bash(mkdir -p /d/cmake-tools/bin)",
+      "Bash(cp \"/c/Program Files/CMake/bin/cmake.exe\" \"/d/cmake-tools/bin/cmake.exe\")",
+      "Bash(cp \"/tmp/ninja/ninja.exe\" \"/d/cmake-tools/bin/ninja.exe\")",
+      "Bash(echo \"Tools ready in D:\\\\\\\\cmake-tools\\\\\\\\bin\\\\\\\\\")",
+      "Read(//d/cmake-tools/**)",
+      "Bash(mkdir -p /d/cmake-tools/share)",
+      "Bash(cp -r \"/c/Program Files/CMake/share/cmake-4.3\" /d/cmake-tools/share/)",
+      "Read(//d/AndroidSdk/build-tools/**)",
+      "Read(//d/AndroidSdk/**)",
+      "Bash(ls /d/AndroidSdk/build-tools/36.1.0/aapt*)",
+      "Bash(xargs grep:*)",
+      "Bash(powershell.exe -Command \"Get-Content D:\\\\herd\\\\automachenicshop-poc\\\\android\\\\app\\\\src\\\\main\\\\java\\\\com\\\\jun\\\\automechanicpos\\\\MainApplication.kt\")",
+      "Bash(powershell.exe -Command \"Select-String -Path D:\\\\herd\\\\automachenicshop-poc\\\\android\\\\app\\\\build\\\\generated\\\\autolinking\\\\src\\\\main\\\\java\\\\com\\\\facebook\\\\react\\\\PackageList.kt -Pattern 'firebase' 2>&1\")",
+      "Bash(powershell.exe -Command \"Get-ChildItem -Recurse -Path D:\\\\herd\\\\automachenicshop-poc\\\\android\\\\app\\\\build\\\\generated -Filter 'PackageList*' 2>&1 | Select-Object FullName\")",
+      "Bash(powershell.exe -Command \"Select-String -Path 'D:\\\\herd\\\\automachenicshop-poc\\\\android\\\\app\\\\build\\\\generated\\\\autolinking\\\\src\\\\main\\\\java\\\\com\\\\facebook\\\\react\\\\PackageList.java' -Pattern 'firebase|Firebase|RNFirebase'\")"
+    ]
+  }
+}
