@@ -1,0 +1,9 @@
+export const TRANSACTION_STATUS = {
+  IN_PROGRESS: 'IN_PROGRESS',
+  FINALIZED: 'FINALIZED',
+  VOIDED: 'VOIDED',
+  CANCELLED: 'CANCELLED',
+  RETURNED: 'RETURNED',
+} as const;
+
+export type TransactionStatus = typeof TRANSACTION_STATUS[keyof typeof TRANSACTION_STATUS];
