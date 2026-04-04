@@ -46,14 +46,6 @@
         {
           "cameraPermission": "Allow AutoShop POS to scan barcodes."
         }
-      ],
-      [
-        "expo-build-properties",
-        {
-          "android": {
-            "enableJetifier": true
-          }
-        }
       ]
     ],
     "extra": {
