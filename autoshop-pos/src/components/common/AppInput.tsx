@@ -4,7 +4,7 @@ import { Colors, Spacing, Typography, BorderRadius } from '@constants/theme';
 
 interface AppInputProps extends Omit<TextInputProps, 'style'> {
   label?: string;
-  error?: string;
+  error?: string | undefined;
   containerStyle?: ViewStyle;
 }
 
