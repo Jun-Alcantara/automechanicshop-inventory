@@ -39,13 +39,18 @@
 | Sprint 0 | Project compiles, DB schema defined, all placeholder folders/files present |
 | Sprint 2 | PIN authentication fully functional (login, lock, unlock) |
 | Sprint 3 | Full navigation skeleton — all tabs and screens reachable |
+| Sprint 4 | Admin stack navigable, settings service operational, user store active |
 | Sprint 5 | All database reads/writes possible (all services implemented) |
 | Sprint 6 | All stores reactive — data flows from DB to UI |
+| Sprint 7 | Dashboard, reports, and user management screens fully navigable |
 | Sprint 8 | Inventory management fully functional |
+| Sprint 9 | Product/service forms, customer list, and barcode scanning functional |
 | Sprint 10 | Customer and vehicle management fully functional |
+| Sprint 11 | Transaction core screens and modals navigable and interactive |
 | Sprint 12 | Transactions can be created, items added, and transaction detail viewed |
 | Sprint 13 | Full transaction lifecycle: create → pay → finalize → void → return |
 | Sprint 14 | Receipt printing (thermal + PDF) functional |
+| Sprint 15 | All store, integration, service, and auth tests passing |
 | Sprint 16 | App ready for internal release |
 
 ---
