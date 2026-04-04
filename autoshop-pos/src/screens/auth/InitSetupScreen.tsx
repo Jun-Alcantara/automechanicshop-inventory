@@ -63,7 +63,7 @@ export const InitSetupScreen: React.FC = () => {
         onChangeText={setDisplayName}
         placeholder="e.g. Juan dela Cruz"
         autoCapitalize="words"
-        error={errors.displayName}
+        {...(errors.displayName ? { error: errors.displayName } : {})}
         containerStyle={styles.field}
       />
       <AppInput
@@ -73,7 +73,7 @@ export const InitSetupScreen: React.FC = () => {
         keyboardType="numeric"
         maxLength={6}
         secureTextEntry
-        error={errors.pin}
+        {...(errors.pin ? { error: errors.pin } : {})}
         containerStyle={styles.field}
       />
       <AppInput
@@ -83,7 +83,7 @@ export const InitSetupScreen: React.FC = () => {
         keyboardType="numeric"
         maxLength={6}
         secureTextEntry
-        error={errors.confirmPin}
+        {...(errors.confirmPin ? { error: errors.confirmPin } : {})}
         containerStyle={styles.field}
       />
 
