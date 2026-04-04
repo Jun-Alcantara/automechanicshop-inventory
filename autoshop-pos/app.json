@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "AutoShop POS",
-    "slug": "autoshop-pos",
+    "slug": "automechanic-pos",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -12,7 +12,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "platforms": ["android"],
+    "platforms": [
+      "android"
+    ],
     "ios": {
       "supportsTablet": true
     },
@@ -24,13 +26,33 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "permissions": ["CAMERA", "BLUETOOTH", "BLUETOOTH_ADMIN", "BLUETOOTH_CONNECT", "BLUETOOTH_SCAN"]
+      "permissions": [
+        "CAMERA",
+        "BLUETOOTH",
+        "BLUETOOTH_ADMIN",
+        "BLUETOOTH_CONNECT",
+        "BLUETOOTH_SCAN",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      ["expo-camera", { "cameraPermission": "Allow AutoShop POS to scan barcodes." }]
-    ]
+      "expo-dev-client",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow AutoShop POS to scan barcodes."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "b3867ec8-1892-4708-8489-eb8b328da51d"
+      }
+    },
+    "owner": "junalcantara"
   }
 }
