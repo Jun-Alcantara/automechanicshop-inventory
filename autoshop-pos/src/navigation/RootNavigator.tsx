@@ -33,7 +33,7 @@ export const RootNavigator: React.FC = () => {
   return (
     <NavigationContainer>
       <AppListeners />
-      <Stack.Navigator screenOptions={{ headerShown: false, animationEnabled: false }}>
+      <Stack.Navigator screenOptions={{ headerShown: false, animation: 'none' }}>
         {isFirstLaunch ? (
           <Stack.Screen name="InitSetup" component={InitSetupScreen} />
         ) : status === 'ACTIVE' ? (
