@@ -9,8 +9,8 @@ import {
 
 const adapter = new SQLiteAdapter({
   schema,
-  migrations: undefined, // will add migrations in a future task
-  jsi: true,             // use JSI for better performance
+  // migrations: omitted until a future task adds them
+jsi: true,             // use JSI for better performance
   onSetUpError: (error) => {
     console.error('WatermelonDB setup error:', error);
   },
