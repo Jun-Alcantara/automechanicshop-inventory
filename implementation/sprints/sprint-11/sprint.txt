@@ -1,0 +1,1 @@
+Suggested build order: 87 → 64 → 65 → 73 → 74 (ErrorBoundary first since it has no deps; modals last since they depend on the callback pattern being established).
