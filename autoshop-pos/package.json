@@ -4,9 +4,13 @@
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
+    "start:dev": "expo start --dev-client",
+    "android": "expo run:android",
+    "build:dev": "eas build --platform android --profile development",
+    "build:preview": "eas build --platform android --profile preview",
+    "build:prod": "eas build --platform android --profile production",
+    "type-check": "tsc --noEmit",
+    "test": "jest"
   },
   "dependencies": {
     "@nozbe/watermelondb": "^0.28.0",
@@ -19,6 +23,7 @@
     "expo": "~54.0.33",
     "expo-camera": "~17.0.10",
     "expo-crypto": "~15.0.8",
+    "expo-dev-client": "~6.0.20",
     "expo-file-system": "~19.0.21",
     "expo-print": "~15.0.8",
     "expo-sharing": "~14.0.8",
