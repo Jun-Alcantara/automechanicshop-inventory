@@ -1,7 +1,7 @@
 import { appSchema, tableSchema } from '@nozbe/watermelondb';
 
 export const schema = appSchema({
-  version: 1,
+  version: 2,
   tables: [
 
     tableSchema({
@@ -10,6 +10,7 @@ export const schema = appSchema({
         { name: 'display_name', type: 'string' },
         { name: 'pin_hash', type: 'string' },
         { name: 'pin_salt', type: 'string' },
+        { name: 'pin_lookup_hash', type: 'string' },
         { name: 'permissions', type: 'string' }, // JSON array string
         { name: 'is_main_admin', type: 'boolean' },
         { name: 'is_active', type: 'boolean' },
