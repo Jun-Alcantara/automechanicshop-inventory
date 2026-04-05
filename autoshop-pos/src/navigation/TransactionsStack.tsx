@@ -14,7 +14,7 @@ const Stack = createStackNavigator<TransactionsStackParamList>();
 
 export const TransactionsStack: React.FC = () => (
   <Stack.Navigator screenOptions={{ headerShown: true }}>
-    <Stack.Screen name="TransactionList" component={TransactionListScreen} options={{ title: 'Transactions' }} />
+    <Stack.Screen name="TransactionList" component={TransactionListScreen} options={{ headerShown: false }} />
     <Stack.Screen name="NewTransaction" component={NewTransactionScreen} options={{ title: 'New Transaction' }} />
     <Stack.Screen name="TransactionDetail" component={TransactionDetailScreen} options={{ title: 'Transaction' }} />
     <Stack.Screen name="Payment" component={PaymentScreen} options={{ title: 'Payment' }} />

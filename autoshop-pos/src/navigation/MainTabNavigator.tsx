@@ -16,6 +16,8 @@ export const MainTabNavigator: React.FC = () => (
       tabBarActiveTintColor: Colors.primary,
       tabBarInactiveTintColor: Colors.gray500,
       tabBarLabelStyle: { fontSize: Typography.xs, fontWeight: '600' },
+      tabBarIcon: () => null,
+      tabBarIconStyle: { display: 'none', height: 0 },
     }}
   >
     <Tab.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'Dashboard' }} />
