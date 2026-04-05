@@ -40,6 +40,10 @@ export const authenticateByPin = async (pin: string): Promise<User | null> => {
   const userModel = candidates[0];
   if (!userModel) return null;
 
+  // DEV shortcut: finding the user by pin_lookup_hash is sufficient proof —
+  // skip the slow PBKDF2 round so emulator logins are instant.
+  if (__DEV__) return mapUserModel(userModel);
+
   const isValid = await verifyPin(pin, userModel.pinHash, userModel.pinSalt);
   return isValid ? mapUserModel(userModel) : null;
 };
