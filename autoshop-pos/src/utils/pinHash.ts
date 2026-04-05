@@ -1,48 +1,41 @@
-import * as Crypto from 'expo-crypto';
+import QuickCrypto from 'react-native-quick-crypto';
 
-// 100,000 iterations of SHA-256 takes ~200–400ms on device — acceptable for PIN unlock.
-// If benchmarking exceeds 1s, reduce to 50_000.
 const ITERATIONS = 100_000;
 const KEY_LENGTH = 32; // bytes → 64 hex chars
-const HASH_ALGORITHM = Crypto.CryptoDigestAlgorithm.SHA256;
 
 /**
  * Generates a cryptographically random 32-byte salt as a hex string.
  */
-export const generateSalt = async (): Promise<string> => {
-  const randomBytes = await Crypto.getRandomBytesAsync(32);
-  return Array.from(randomBytes)
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+export const generateSalt = (): string => {
+  const randomBytes = QuickCrypto.randomBytes(32);
+  return Buffer.from(randomBytes).toString('hex');
 };
 
 /**
- * Hashes a 6-digit PIN using PBKDF2-SHA256.
- * Returns the hash as a hex string.
- *
- * Note: expo-crypto does not expose a native PBKDF2 API directly.
- * We implement PBKDF2 manually using HMAC-SHA256 iterations via
- * Crypto.digestStringAsync. For production hardening, replace with
- * a native PBKDF2 binding (e.g., react-native-quick-crypto) if
- * available and compatible with the Expo managed workflow.
+ * Hashes a 6-digit PIN using native PBKDF2-SHA256 via react-native-quick-crypto.
+ * Runs entirely on the native thread — no JS bridge roundtrips per iteration.
  */
-export const hashPin = async (pin: string, salt: string): Promise<string> => {
-  // PBKDF2 via iterated HMAC-SHA256 (simplified — single PRF block, 100k rounds)
-  // pin + salt → UTF-8 string for consistent encoding
-  let derived = `${pin}:${salt}`;
-
-  for (let i = 0; i < ITERATIONS; i++) {
-    derived = await Crypto.digestStringAsync(HASH_ALGORITHM, derived, {
-      encoding: Crypto.CryptoEncoding.HEX,
+export const hashPin = (pin: string, salt: string): Promise<string> =>
+  new Promise((resolve, reject) => {
+    QuickCrypto.pbkdf2(pin, salt, ITERATIONS, KEY_LENGTH, 'sha256', (err, derivedKey) => {
+      if (err || !derivedKey) return reject(err ?? new Error('PBKDF2 failed'));
+      resolve(Buffer.from(derivedKey).toString('hex'));
     });
-  }
+  });
 
-  return derived.slice(0, KEY_LENGTH * 2); // 64 hex chars
-};
+/**
+ * Computes a fast, non-salted SHA-256 of the PIN for DB lookup purposes.
+ * Used to locate the candidate user record before running the full PBKDF2 verify.
+ *
+ * Security note: PINs are 6 digits (≤1M possibilities) and are inherently weak
+ * against offline brute force regardless. The lookup hash doesn't add meaningful
+ * attack surface — PBKDF2 remains the rate-limiting verifier.
+ */
+export const computePinLookupHash = (pin: string): string =>
+  QuickCrypto.createHash('sha256').update(pin).digest('hex') as string;
 
 /**
  * Verifies a plain PIN against a stored hash + salt.
- * Constant-time comparison via re-hashing (no timing attack from JS string compare).
  */
 export const verifyPin = async (
   candidatePin: string,

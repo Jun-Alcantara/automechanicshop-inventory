@@ -1,7 +1,7 @@
 import { database } from './database';
 import { Q } from '@nozbe/watermelondb';
 import { UserModel } from '../models/UserModel';
-import { verifyPin } from '../utils/pinHash';
+import { verifyPin, computePinLookupHash } from '../utils/pinHash';
 import type { User } from '../types';
 
 /**
@@ -23,27 +23,25 @@ export const mapUserModel = (model: UserModel): User => ({
 });
 
 /**
- * Looks up a user by attempting PIN verification against all active user records.
- * Returns the matching User or null if no match.
+ * Authenticates a user by PIN.
  *
- * Note: We iterate through all active users and verify the PIN hash.
- * PINs are unique across all accounts (enforced at creation time in userService),
- * so at most one user will match.
+ * Fast path: queries the DB by pin_lookup_hash to find the candidate user in O(1),
+ * then runs PBKDF2 verification exactly once. Previously this ran PBKDF2 against
+ * every active user (N × ~3s = very slow).
  */
 export const authenticateByPin = async (pin: string): Promise<User | null> => {
-  const activeUsers = await database
+  const lookupHash = computePinLookupHash(pin);
+
+  const candidates = await database
     .get<UserModel>('users')
-    .query(Q.where('is_active', true))
+    .query(Q.where('is_active', true), Q.where('pin_lookup_hash', lookupHash))
     .fetch();
 
-  for (const userModel of activeUsers) {
-    const matches = await verifyPin(pin, userModel.pinHash, userModel.pinSalt);
-    if (matches) {
-      return mapUserModel(userModel);
-    }
-  }
+  const userModel = candidates[0];
+  if (!userModel) return null;
 
-  return null;
+  const isValid = await verifyPin(pin, userModel.pinHash, userModel.pinSalt);
+  return isValid ? mapUserModel(userModel) : null;
 };
 
 /**
@@ -63,21 +61,25 @@ export const getUserById = async (userId: string): Promise<User | null> => {
 /**
  * Checks whether a given PIN is already in use by any active user.
  * Used during user creation and PIN change to enforce uniqueness.
+ *
+ * Uses pin_lookup_hash for an O(1) DB lookup — no PBKDF2 needed.
  */
 export const isPinTaken = async (
   pin: string,
   excludeUserId?: string
 ): Promise<boolean> => {
-  const activeUsers = await database
+  const lookupHash = computePinLookupHash(pin);
+
+  const conditions = [
+    Q.where('is_active', true),
+    Q.where('pin_lookup_hash', lookupHash),
+    ...(excludeUserId ? [Q.where('id', Q.notEq(excludeUserId))] : []),
+  ];
+
+  const matches = await database
     .get<UserModel>('users')
-    .query(Q.where('is_active', true))
+    .query(...conditions)
     .fetch();
 
-  for (const userModel of activeUsers) {
-    if (excludeUserId && userModel.id === excludeUserId) continue;
-    const matches = await verifyPin(pin, userModel.pinHash, userModel.pinSalt);
-    if (matches) return true;
-  }
-
-  return false;
+  return matches.length > 0;
 };

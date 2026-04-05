@@ -13,6 +13,7 @@ export class UserModel extends Model {
   @text('display_name') displayName!: string;
   @text('pin_hash') pinHash!: string;
   @text('pin_salt') pinSalt!: string;
+  @text('pin_lookup_hash') pinLookupHash!: string;
   @json('permissions', sanitizePermissions) permissions!: Permission[];
   @field('is_main_admin') isMainAdmin!: boolean;
   @field('is_active') isActive!: boolean;

@@ -1,6 +1,6 @@
 import { database } from './database';
 import { UserModel } from '../models/UserModel';
-import { hashPin, generateSalt } from '../utils/pinHash';
+import { hashPin, generateSalt, computePinLookupHash } from '../utils/pinHash';
 import { PERMISSIONS } from '../constants/permissions';
 import type { User } from '../types';
 import { mapUserModel } from './authService';
@@ -11,8 +11,11 @@ import { mapUserModel } from './authService';
  * Grants all permissions to the Main Admin.
  */
 export const createMainAdmin = async (displayName: string, pin: string): Promise<User> => {
-  const salt = await generateSalt();
-  const pinHash = await hashPin(pin, salt);
+  const salt = generateSalt();
+  const [pinHash, pinLookupHash] = await Promise.all([
+    hashPin(pin, salt),
+    Promise.resolve(computePinLookupHash(pin)),
+  ]);
 
   let createdModel: UserModel | null = null;
 
@@ -21,6 +24,7 @@ export const createMainAdmin = async (displayName: string, pin: string): Promise
       user.displayName = displayName;
       user.pinHash = pinHash;
       user.pinSalt = salt;
+      user.pinLookupHash = pinLookupHash;
       user.permissions = Object.values(PERMISSIONS);
       user.isMainAdmin = true;
       user.isActive = true;
