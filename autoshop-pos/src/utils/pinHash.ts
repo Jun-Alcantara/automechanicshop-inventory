@@ -8,7 +8,7 @@ const KEY_LENGTH = 32; // bytes → 64 hex chars
  */
 export const generateSalt = (): string => {
   const randomBytes = QuickCrypto.randomBytes(32);
-  return Buffer.from(randomBytes).toString('hex');
+  return (randomBytes as any).toString('hex') as string;
 };
 
 /**
@@ -19,7 +19,7 @@ export const hashPin = (pin: string, salt: string): Promise<string> =>
   new Promise((resolve, reject) => {
     QuickCrypto.pbkdf2(pin, salt, ITERATIONS, KEY_LENGTH, 'sha256', (err, derivedKey) => {
       if (err || !derivedKey) return reject(err ?? new Error('PBKDF2 failed'));
-      resolve(Buffer.from(derivedKey).toString('hex'));
+      resolve((derivedKey as any).toString('hex') as string);
     });
   });
 
