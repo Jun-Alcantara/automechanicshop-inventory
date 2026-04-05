@@ -66,7 +66,7 @@ export const PinLockScreen: React.FC = () => {
         });
       }
 
-      navigation.replace('MainTabs');
+      navigation.replace('MainTabs', {});
     } catch (e) {
       Alert.alert('Error', e instanceof Error ? e.message : 'An error occurred.');
     } finally {
