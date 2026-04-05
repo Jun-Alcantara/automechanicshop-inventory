@@ -1,19 +1,41 @@
 import { create } from 'zustand';
+import { readSettings, updateSettings as updateSettingsService } from '../services/settingsService';
+import type { AppSettings } from '../types';
 
 interface SettingsStore {
-  settings: null; // will be typed as AppSettings | null in AMSPOS-43
+  settings: AppSettings | null;
   error: Error | null;
 
   subscribe: () => void;
   unsubscribe: () => void;
-  updateSettings: (patch: Record<string, unknown>) => Promise<void>;
+  updateSettings: (patch: Partial<AppSettings>) => Promise<void>;
 }
 
 export const useSettingsStore = create<SettingsStore>((set) => ({
   settings: null,
   error: null,
 
-  subscribe: () => { /* implemented in AMSPOS-43 */ },
-  unsubscribe: () => {},
-  updateSettings: async (_patch) => {},
+  subscribe: async () => {
+    try {
+      const settings = await readSettings();
+      set({ settings, error: null });
+    } catch (e) {
+      set({ error: e instanceof Error ? e : new Error(String(e)) });
+    }
+  },
+
+  unsubscribe: () => {
+    // Settings are a one-time read — nothing to unsubscribe
+    set({ settings: null });
+  },
+
+  updateSettings: async (patch) => {
+    try {
+      const updated = await updateSettingsService(patch);
+      set({ settings: updated });
+    } catch (e) {
+      set({ error: e instanceof Error ? e : new Error(String(e)) });
+      throw e;
+    }
+  },
 }));
