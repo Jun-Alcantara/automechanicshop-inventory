@@ -1,16 +1,26 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { DashboardScreen } from '@screens/dashboard/DashboardScreen';
+import { TransactionsStack } from './TransactionsStack';
+import { InventoryStack } from './InventoryStack';
+import { AdminStack } from './AdminStack';
+import { Colors, Typography } from '@constants/theme';
+import type { MainTabParamList } from './types';
 
-/**
- * Placeholder — full implementation is tracked in AMSPOS-22/23.
- */
+const Tab = createBottomTabNavigator<MainTabParamList>();
+
 export const MainTabNavigator: React.FC = () => (
-  <View style={styles.container}>
-    <Text style={styles.text}>Main App (Coming Soon)</Text>
-  </View>
+  <Tab.Navigator
+    screenOptions={{
+      headerShown: false,
+      tabBarActiveTintColor: Colors.primary,
+      tabBarInactiveTintColor: Colors.gray500,
+      tabBarLabelStyle: { fontSize: Typography.xs, fontWeight: '600' },
+    }}
+  >
+    <Tab.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'Dashboard' }} />
+    <Tab.Screen name="Transactions" component={TransactionsStack} options={{ title: 'Transactions' }} />
+    <Tab.Screen name="Inventory" component={InventoryStack} options={{ title: 'Inventory' }} />
+    <Tab.Screen name="Admin" component={AdminStack} options={{ title: 'Admin' }} />
+  </Tab.Navigator>
 );
-
-const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  text: { fontSize: 18, color: '#333' },
-});
