@@ -53,6 +53,10 @@ export const InventoryListScreen: React.FC<Props> = ({ navigation }) => {
       p.barcode?.includes(query)
   );
 
+  const filteredServices = serviceItems.filter((s) =>
+    s.name.toLowerCase().includes(query.toLowerCase())
+  );
+
   const renderProduct = ({ item }: { item: Product }) => (
     <ProductCard
       product={item}
@@ -177,16 +181,24 @@ export const InventoryListScreen: React.FC<Props> = ({ navigation }) => {
       {/* Services Tab */}
       {activeTab === 'services' && (
         <View style={styles.content}>
+          <AppInput
+            placeholder="Search by name…"
+            value={query}
+            onChangeText={setQuery}
+            containerStyle={styles.search}
+          />
           <FlatList
-            data={serviceItems}
+            data={filteredServices}
             keyExtractor={(item) => item.id}
             renderItem={renderServiceItem}
             contentContainerStyle={[
               styles.list,
-              serviceItems.length === 0 && styles.listEmpty,
+              filteredServices.length === 0 && styles.listEmpty,
             ]}
             ListEmptyComponent={
-              <EmptyState title="No service items found" />
+              query
+                ? <EmptyState title="No services found" subtitle="Try a different name." />
+                : <EmptyState title="No service items found" />
             }
           />
         </View>
