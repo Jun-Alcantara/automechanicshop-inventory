@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
   },
   permissionText: {
     fontSize: Typography.base,
-    color: Colors.gray800,
+    color: Colors.gray900,
   },
   saveButton: {
     marginTop: Spacing.md,

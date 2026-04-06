@@ -56,7 +56,7 @@ export const createUser = async (
   currentUser: User,
   displayName: string,
   pin: string,
-  permissions: string[]
+  permissions: Permission[]
 ): Promise<User> => {
   const salt = generateSalt();
   const [pinHash, pinLookupHash] = await Promise.all([
@@ -163,4 +163,6 @@ export const changeOwnPin = async (
       (u as any).updatedBy = user.id;
     });
   });
+};
+);
 };
