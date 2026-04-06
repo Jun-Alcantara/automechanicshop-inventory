@@ -50,6 +50,92 @@ export const observeUsers = () =>
     .observe();
 
 /**
+ * Creates a new user.
+ */
+export const createUser = async (
+  currentUser: User,
+  displayName: string,
+  pin: string,
+  permissions: string[]
+): Promise<User> => {
+  const salt = generateSalt();
+  const [pinHash, pinLookupHash] = await Promise.all([
+    hashPin(pin, salt),
+    Promise.resolve(computePinLookupHash(pin)),
+  ]);
+
+  let createdModel: UserModel | null = null;
+
+  await database.write(async () => {
+    createdModel = await database.get<UserModel>('users').create((user) => {
+      user.displayName = displayName;
+      user.pinHash = pinHash;
+      user.pinSalt = salt;
+      user.pinLookupHash = pinLookupHash;
+      user.permissions = permissions;
+      user.isMainAdmin = false;
+      user.isActive = true;
+      (user as any).createdAt = new Date();
+      (user as any).createdBy = currentUser.id;
+      (user as any).updatedAt = new Date();
+      (user as any).updatedBy = currentUser.id;
+    });
+  });
+
+  return mapUserModel(createdModel!);
+};
+
+/**
+ * Updates an existing user.
+ */
+export const updateUser = async (
+  currentUser: User,
+  userId: string,
+  updates: {
+    displayName?: string;
+    pin?: string;
+    permissions?: string[];
+    isActive?: boolean;
+  }
+): Promise<User> => {
+  const model = await database.get<UserModel>('users').find(userId);
+  let newPinHash = model.pinHash;
+  let newPinSalt = model.pinSalt;
+  let newPinLookupHash = model.pinLookupHash;
+
+  if (updates.pin && updates.pin.trim() !== '') {
+    newPinSalt = generateSalt();
+    [newPinHash, newPinLookupHash] = await Promise.all([
+      hashPin(updates.pin, newPinSalt),
+      Promise.resolve(computePinLookupHash(updates.pin)),
+    ]);
+  }
+
+  await database.write(async () => {
+    await model.update((u) => {
+      if (updates.displayName !== undefined) u.displayName = updates.displayName;
+      if (updates.permissions !== undefined) u.permissions = updates.permissions;
+      if (updates.isActive !== undefined) u.isActive = updates.isActive;
+      u.pinHash = newPinHash;
+      u.pinSalt = newPinSalt;
+      u.pinLookupHash = newPinLookupHash;
+      (u as any).updatedAt = new Date();
+      (u as any).updatedBy = currentUser.id;
+    });
+  });
+
+  return mapUserModel(model);
+};
+
+/**
+ * Fetches a user by ID.
+ */
+export const getUser = async (id: string): Promise<User> => {
+  const model = await database.get<UserModel>('users').find(id);
+  return mapUserModel(model);
+};
+
+/**
  * Changes the current user's own PIN after verifying the current PIN.
  * Throws an error with a user-readable message if the current PIN is wrong.
  */
