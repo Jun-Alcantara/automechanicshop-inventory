@@ -139,6 +139,17 @@ export const createSupplier = async (
 };
 
 /**
+ * Hard-deletes a supplier. No audit log (not in audit matrix).
+ */
+export const deleteSupplier = async (id: string): Promise<void> => {
+  const model = await database.get<SupplierModel>('suppliers').find(id);
+
+  await database.write(async () => {
+    await model.destroyPermanently();
+  });
+};
+
+/**
  * Applies a partial patch to an existing supplier. No audit log (not in audit matrix).
  */
 export const updateSupplier = async (
