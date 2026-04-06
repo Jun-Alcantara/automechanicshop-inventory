@@ -28,7 +28,7 @@ import { fetchTodayStats } from '@services/transactionService';
 import { useInventoryStore } from '@stores/inventoryStore';
 
 const mockFetchTodayStats = fetchTodayStats as jest.Mock;
-const mockUseInventoryStore = useInventoryStore as jest.Mock;
+const mockUseInventoryStore = useInventoryStore as unknown as jest.Mock;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
