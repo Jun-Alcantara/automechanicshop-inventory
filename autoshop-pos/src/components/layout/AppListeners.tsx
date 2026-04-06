@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import { useSessionStore } from '@stores/sessionStore';
 import { useInventoryStore } from '@stores/inventoryStore';
 import { useCatalogStore } from '@stores/catalogStore';
@@ -7,6 +8,7 @@ import { useSettingsStore } from '@stores/settingsStore';
 import { useUserStore } from '@stores/userStore';
 import { useInactivityTimer } from '@hooks/useInactivityTimer';
 import { hasPermission } from '@utils/permissions';
+import { Colors } from '@constants/theme';
 
 /**
  * Mounts as a sibling to the main navigation tree inside RootNavigator.
@@ -40,6 +42,37 @@ export const AppListeners: React.FC = () => {
     }
   }, [status, user]);
 
-  // This component renders nothing — it is a side-effect-only component
-  return null;
+  // Select error fields from each store
+  const inventoryError = useInventoryStore((s) => s.error);
+  const catalogError = useCatalogStore((s) => s.error);
+  const settingsError = useSettingsStore((s) => s.error);
+
+  const hasError = !!(inventoryError || catalogError || settingsError);
+
+  return hasError ? (
+    <View style={styles.errorBanner}>
+      <Text style={styles.errorText}>
+        Data sync error. Some information may be outdated.
+      </Text>
+    </View>
+  ) : null;
 };
+
+const styles = StyleSheet.create({
+  errorBanner: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 9999,
+    backgroundColor: Colors.dangerLight,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+  },
+  errorText: {
+    color: Colors.danger,
+    fontSize: 13,
+    fontWeight: '500',
+  },
+});
