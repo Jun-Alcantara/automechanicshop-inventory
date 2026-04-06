@@ -77,29 +77,55 @@ export const UserFormScreen: React.FC = () => {
     if (!currentUser || !userToEdit) return;
     const newStatus = !isActive;
     
-    Alert.alert(
-      newStatus ? 'Activate User' : 'Deactivate User',
-      `Are you sure you want to ${newStatus ? 'activate' : 'deactivate'} this user?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: newStatus ? 'Activate' : 'Deactivate',
-          style: newStatus ? 'default' : 'destructive',
-          onPress: async () => {
-            try {
-              setIsSaving(true);
-              await updateUser(currentUser, userToEdit.id, { isActive: newStatus });
-              setIsActive(newStatus);
-              Alert.alert('Success', `User has been ${newStatus ? 'activated' : 'deactivated'}.`);
-            } catch (error) {
-              Alert.alert('Error', 'Failed to update user status.');
-            } finally {
-              setIsSaving(false);
-            }
+    if (!newStatus) {
+      Alert.alert(
+        'Deactivate User',
+        'Are you sure you want to deactivate this user?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Deactivate',
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                setIsSaving(true);
+                await deactivateUser(currentUser, userToEdit.id);
+                setIsActive(false);
+                Alert.alert('Success', 'User has been deactivated.');
+              } catch (error) {
+                Alert.alert('Error', 'Failed to deactivate user.');
+              } finally {
+                setIsSaving(false);
+              }
+            },
           },
-        },
-      ]
-    );
+        ]
+      );
+    } else {
+      Alert.alert(
+        'Activate User',
+        'Are you sure you want to activate this user?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Activate',
+            style: 'default',
+            onPress: async () => {
+              try {
+                setIsSaving(true);
+                await updateUser(currentUser, userToEdit.id, { isActive: true });
+                setIsActive(true);
+                Alert.alert('Success', 'User has been activated.');
+              } catch (error) {
+                Alert.alert('Error', 'Failed to update user status.');
+              } finally {
+                setIsSaving(false);
+              }
+            },
+          },
+        ]
+      );
+    }
   };
 
   const validate = () => {

@@ -128,6 +128,27 @@ export const updateUser = async (
 };
 
 /**
+ * Deactivates an existing user.
+ */
+export const deactivateUser = async (currentUser: User, userId: string): Promise<User> => {
+  const model = await database.get<UserModel>('users').find(userId);
+  
+  if (model.isMainAdmin) {
+    throw new Error('Cannot deactivate the Main Admin.');
+  }
+
+  await database.write(async () => {
+    await model.update((u) => {
+      u.isActive = false;
+      (u as any).updatedAt = new Date();
+      (u as any).updatedBy = currentUser.id;
+    });
+  });
+
+  return mapUserModel(model);
+};
+
+/**
  * Fetches a user by ID.
  */
 export const getUser = async (id: string): Promise<User> => {
