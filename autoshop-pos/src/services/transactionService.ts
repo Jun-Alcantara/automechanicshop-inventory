@@ -106,6 +106,25 @@ export const fetchTodayStats = async (): Promise<TodayStats> => {
   return { totalSales, orderCount, topSellingParts };
 };
 
+/**
+ * Fetches FINALIZED transactions whose finalizedAt falls within [startMs, endMs].
+ */
+export const fetchTransactionsByDateRange = async (
+  startMs: number,
+  endMs: number
+): Promise<Transaction[]> => {
+  const models = await database
+    .get<TransactionModel>('transactions')
+    .query(
+      Q.where('status', 'FINALIZED'),
+      Q.where('finalized_at', Q.gte(startMs)),
+      Q.where('finalized_at', Q.lte(endMs))
+    )
+    .fetch();
+
+  return models.map(mapTransactionModel);
+};
+
 // ─── Observables ─────────────────────────────────────────────────────────────
 
 /**
