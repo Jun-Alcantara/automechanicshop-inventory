@@ -34,10 +34,11 @@ export const UserFormScreen: React.FC = () => {
   
   const [displayName, setDisplayName] = useState('');
   const [pin, setPin] = useState('');
+  const [confirmPin, setConfirmPin] = useState('');
   const [selectedPermissions, setSelectedPermissions] = useState<Set<Permission>>(new Set());
   const [isActive, setIsActive] = useState(true);
 
-  const [errors, setErrors] = useState<{ displayName?: string; pin?: string }>({});
+  const [errors, setErrors] = useState<{ displayName?: string; pin?: string; confirmPin?: string }>({});
 
   useEffect(() => {
     if (isEditMode && userId) {
@@ -102,7 +103,7 @@ export const UserFormScreen: React.FC = () => {
   };
 
   const validate = () => {
-    const newErrors: { displayName?: string; pin?: string } = {};
+    const newErrors: { displayName?: string; pin?: string; confirmPin?: string } = {};
     if (!displayName.trim()) {
       newErrors.displayName = 'Display name is required.';
     }
@@ -113,6 +114,12 @@ export const UserFormScreen: React.FC = () => {
       newErrors.pin = 'PIN must be at least 4 digits.';
     } else if (pin && !/^\d+$/.test(pin)) {
       newErrors.pin = 'PIN must contain only numbers.';
+    }
+
+    if (pin || !isEditMode) {
+      if (pin !== confirmPin) {
+        newErrors.confirmPin = 'PINs do not match.';
+      }
     }
 
     setErrors(newErrors);
@@ -182,6 +189,18 @@ export const UserFormScreen: React.FC = () => {
             maxLength={6}
             error={errors.pin}
           />
+          {(!isEditMode || pin.length > 0) && (
+            <AppInput
+              label="Confirm PIN"
+              placeholder="****"
+              value={confirmPin}
+              onChangeText={setConfirmPin}
+              secureTextEntry
+              keyboardType="number-pad"
+              maxLength={6}
+              error={errors.confirmPin}
+            />
+          )}
         </View>
 
         <View style={styles.section}>
