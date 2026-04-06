@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -35,7 +35,7 @@ type FormErrors = {
 
 export const SupplierListScreen: React.FC = () => {
   const isAuthorized = usePermissionGuard('MANAGE_INVENTORY');
-  const { suppliers, loading, subscribe, unsubscribe } = useCatalogStore();
+  const { suppliers, loading, subscribe } = useCatalogStore();
   const currentUser = useSessionStore((s) => s.user);
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -50,11 +50,6 @@ export const SupplierListScreen: React.FC = () => {
     }, [subscribe])
   );
 
-  useEffect(() => {
-    return () => {
-      unsubscribe();
-    };
-  }, [unsubscribe]);
 
   if (!isAuthorized) return null;
 

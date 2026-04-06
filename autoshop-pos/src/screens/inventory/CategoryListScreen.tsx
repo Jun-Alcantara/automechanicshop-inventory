@@ -21,7 +21,7 @@ import type { Category } from '@/types';
 
 export const CategoryListScreen: React.FC = () => {
   const isAuthorized = usePermissionGuard('MANAGE_INVENTORY');
-  const { categories, loading, subscribe, unsubscribe } = useCatalogStore();
+  const { categories, loading, subscribe } = useCatalogStore();
   const user = useSessionStore((s) => s.user);
 
   const [showInlineInput, setShowInlineInput] = useState(false);
@@ -35,11 +35,6 @@ export const CategoryListScreen: React.FC = () => {
     }, [subscribe])
   );
 
-  useEffect(() => {
-    return () => {
-      unsubscribe();
-    };
-  }, [unsubscribe]);
 
   useEffect(() => {
     if (showInlineInput) {
@@ -141,7 +136,7 @@ export const CategoryListScreen: React.FC = () => {
         data={categories}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        ListHeaderComponent={renderHeader}
+        ListHeaderComponent={renderHeader()}
         contentContainerStyle={[
           styles.list,
           categories.length === 0 && !showInlineInput && styles.listEmpty,

@@ -4,6 +4,8 @@ import {
   Text,
   FlatList,
   TouchableOpacity,
+  Modal,
+  Pressable,
   StyleSheet,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -28,6 +30,7 @@ export const InventoryListScreen: React.FC<Props> = ({ navigation }) => {
   const canManage = useHasPermission('MANAGE_INVENTORY');
   const [activeTab, setActiveTab] = useState<Tab>('products');
   const [query, setQuery] = useState('');
+  const [showManageMenu, setShowManageMenu] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -48,6 +51,10 @@ export const InventoryListScreen: React.FC<Props> = ({ navigation }) => {
     (p) =>
       p.name.toLowerCase().includes(query.toLowerCase()) ||
       p.barcode?.includes(query)
+  );
+
+  const filteredServices = serviceItems.filter((s) =>
+    s.name.toLowerCase().includes(query.toLowerCase())
   );
 
   const renderProduct = ({ item }: { item: Product }) => (
@@ -102,7 +109,48 @@ export const InventoryListScreen: React.FC<Props> = ({ navigation }) => {
             Services
           </Text>
         </TouchableOpacity>
+        {canManage && (
+          <TouchableOpacity
+            style={styles.manageButton}
+            onPress={() => setShowManageMenu(true)}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.manageButtonLabel}>⚙</Text>
+          </TouchableOpacity>
+        )}
       </View>
+
+      {/* Manage Menu */}
+      <Modal
+        visible={showManageMenu}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowManageMenu(false)}
+      >
+        <Pressable style={styles.menuOverlay} onPress={() => setShowManageMenu(false)}>
+          <View style={styles.menuCard}>
+            <Text style={styles.menuTitle}>Manage</Text>
+            {[
+              { label: 'Categories', route: 'CategoryList' as const },
+              { label: 'Suppliers', route: 'SupplierList' as const },
+              { label: 'Add-on Catalog', route: 'AddOnCatalog' as const },
+            ].map(({ label, route }, index, arr) => (
+              <TouchableOpacity
+                key={route}
+                style={[styles.menuItem, index < arr.length - 1 && styles.menuItemBorder]}
+                onPress={() => {
+                  setShowManageMenu(false);
+                  navigation.navigate(route);
+                }}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.menuItemLabel}>{label}</Text>
+                <Text style={styles.menuItemArrow}>›</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </Pressable>
+      </Modal>
 
       {/* Products Tab */}
       {activeTab === 'products' && (
@@ -133,16 +181,24 @@ export const InventoryListScreen: React.FC<Props> = ({ navigation }) => {
       {/* Services Tab */}
       {activeTab === 'services' && (
         <View style={styles.content}>
+          <AppInput
+            placeholder="Search by name…"
+            value={query}
+            onChangeText={setQuery}
+            containerStyle={styles.search}
+          />
           <FlatList
-            data={serviceItems}
+            data={filteredServices}
             keyExtractor={(item) => item.id}
             renderItem={renderServiceItem}
             contentContainerStyle={[
               styles.list,
-              serviceItems.length === 0 && styles.listEmpty,
+              filteredServices.length === 0 && styles.listEmpty,
             ]}
             ListEmptyComponent={
-              <EmptyState title="No service items found" />
+              query
+                ? <EmptyState title="No services found" subtitle="Try a different name." />
+                : <EmptyState title="No service items found" />
             }
           />
         </View>
@@ -251,5 +307,64 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontSize: Typography.base,
     fontWeight: '600',
+  },
+  manageButton: {
+    paddingHorizontal: Spacing.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  manageButtonLabel: {
+    fontSize: Typography.lg,
+    color: Colors.gray500,
+  },
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+    paddingTop: 8,
+    paddingRight: Spacing.md,
+  },
+  menuCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: BorderRadius.md,
+    minWidth: 180,
+    elevation: 6,
+    shadowColor: Colors.black,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    overflow: 'hidden',
+  },
+  menuTitle: {
+    fontSize: Typography.sm,
+    fontWeight: '700',
+    color: Colors.gray500,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm + 2,
+  },
+  menuItemBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  menuItemLabel: {
+    fontSize: Typography.base,
+    color: Colors.black,
+  },
+  menuItemArrow: {
+    fontSize: Typography.lg,
+    color: Colors.gray500,
+    marginLeft: Spacing.sm,
   },
 });
