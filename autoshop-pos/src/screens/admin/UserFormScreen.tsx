@@ -127,11 +127,13 @@ export const UserFormScreen: React.FC = () => {
       const permissionsArray = Array.from(selectedPermissions);
 
       if (isEditMode && userId) {
-        await updateUser(currentUser, userId, {
+        const updates: { displayName?: string; pin?: string; permissions?: Permission[] } = {
           displayName: displayName.trim(),
-          pin: pin ? pin : undefined,
           permissions: permissionsArray,
-        });
+        };
+        if (pin) updates.pin = pin;
+        
+        await updateUser(currentUser, userId, updates);
         Alert.alert('Success', 'User updated successfully.');
       } else {
         await createUser(currentUser, displayName.trim(), pin, permissionsArray);
