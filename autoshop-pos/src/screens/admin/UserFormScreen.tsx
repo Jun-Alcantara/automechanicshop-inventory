@@ -9,7 +9,7 @@ import { AppInput } from '@components/common/AppInput';
 import { AppButton } from '@components/common/AppButton';
 import { usePermissionGuard } from '@hooks/usePermissionGuard';
 import { useSessionStore } from '@stores/sessionStore';
-import { getUser, createUser, updateUser } from '@services/userService';
+import { getUser, createUser, updateUser, deactivateUser } from '@services/userService';
 import { PERMISSIONS } from '@constants/permissions';
 import type { AdminStackParamList } from '@navigation/types';
 import type { User, Permission } from '@/types';
