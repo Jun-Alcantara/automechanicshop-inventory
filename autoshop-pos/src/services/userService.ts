@@ -3,7 +3,7 @@ import { Q } from '@nozbe/watermelondb';
 import { UserModel } from '../models/UserModel';
 import { hashPin, generateSalt, computePinLookupHash, verifyPin } from '../utils/pinHash';
 import { PERMISSIONS } from '../constants/permissions';
-import type { User } from '../types';
+import type { User, Permission } from '../types';
 import { mapUserModel } from './authService';
 
 /**
@@ -48,6 +48,113 @@ export const observeUsers = () =>
     .get<UserModel>('users')
     .query(Q.sortBy('display_name', Q.asc))
     .observe();
+
+/**
+ * Creates a new user.
+ */
+export const createUser = async (
+  currentUser: User,
+  displayName: string,
+  pin: string,
+  permissions: Permission[]
+): Promise<User> => {
+  const salt = generateSalt();
+  const [pinHash, pinLookupHash] = await Promise.all([
+    hashPin(pin, salt),
+    Promise.resolve(computePinLookupHash(pin)),
+  ]);
+
+  let createdModel: UserModel | null = null;
+
+  await database.write(async () => {
+    createdModel = await database.get<UserModel>('users').create((user) => {
+      user.displayName = displayName;
+      user.pinHash = pinHash;
+      user.pinSalt = salt;
+      user.pinLookupHash = pinLookupHash;
+      user.permissions = permissions;
+      user.isMainAdmin = false;
+      user.isActive = true;
+      (user as any).createdAt = new Date();
+      (user as any).createdBy = currentUser.id;
+      (user as any).updatedAt = new Date();
+      (user as any).updatedBy = currentUser.id;
+    });
+  });
+
+  return mapUserModel(createdModel!);
+};
+
+/**
+ * Updates an existing user.
+ */
+export const updateUser = async (
+  currentUser: User,
+  userId: string,
+  updates: {
+    displayName?: string;
+    pin?: string;
+    permissions?: Permission[];
+    isActive?: boolean;
+  }
+): Promise<User> => {
+  const model = await database.get<UserModel>('users').find(userId);
+  let newPinHash = model.pinHash;
+  let newPinSalt = model.pinSalt;
+  let newPinLookupHash = model.pinLookupHash;
+
+  if (updates.pin && updates.pin.trim() !== '') {
+    newPinSalt = generateSalt();
+    [newPinHash, newPinLookupHash] = await Promise.all([
+      hashPin(updates.pin, newPinSalt),
+      Promise.resolve(computePinLookupHash(updates.pin)),
+    ]);
+  }
+
+  await database.write(async () => {
+    await model.update((u) => {
+      if (updates.displayName !== undefined) u.displayName = updates.displayName;
+      if (updates.permissions !== undefined) u.permissions = updates.permissions;
+      if (updates.isActive !== undefined) u.isActive = updates.isActive;
+      u.pinHash = newPinHash;
+      u.pinSalt = newPinSalt;
+      u.pinLookupHash = newPinLookupHash;
+      (u as any).updatedAt = new Date();
+      (u as any).updatedBy = currentUser.id;
+    });
+  });
+
+  return mapUserModel(model);
+};
+
+/**
+ * Deactivates an existing user.
+ */
+export const deactivateUser = async (currentUser: User, userId: string): Promise<User> => {
+  const model = await database.get<UserModel>('users').find(userId);
+  
+  if (model.isMainAdmin) {
+    throw new Error('Cannot deactivate the Main Admin.');
+  }
+
+  await database.write(async () => {
+    await model.update((u) => {
+      u.isActive = false;
+      (u as any).updatedAt = new Date();
+      (u as any).updatedBy = currentUser.id;
+    });
+  });
+
+  return mapUserModel(model);
+};
+
+/**
+ * Fetches a user by ID.
+ */
+export const getUser = async (id: string): Promise<User> => {
+  const model = await database.get<UserModel>('users').find(id);
+  return mapUserModel(model);
+};
 
 /**
  * Changes the current user's own PIN after verifying the current PIN.
