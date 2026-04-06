@@ -603,6 +603,51 @@ export const applyDiscount = async (
   });
 };
 
+/**
+ * Removes any discount from a line item and updates transaction totals.
+ */
+export const removeDiscount = async (
+  lineItemId: string,
+  actingUser: User
+): Promise<void> => {
+  const lineItem = await database.get<LineItemModel>('line_items').find(lineItemId);
+  const transaction = await database.get<TransactionModel>('transactions').find(lineItem.transactionId);
+  const prevDiscountType = lineItem.discountType;
+  const prevDiscountValue = lineItem.discountValue;
+
+  await database.write(async () => {
+    // 1. Clear discount on line item
+    await lineItem.update((li) => {
+      li.discountType = '';
+      li.discountValue = 0;
+      li.discountAmount = 0;
+      li.total = li.subtotal;
+    });
+
+    // 2. Update transaction totals
+    const allLineItems = await database.get<LineItemModel>('line_items')
+      .query(Q.where('transaction_id', lineItem.transactionId))
+      .fetch();
+    const newTotal = allLineItems.reduce((sum, li) => sum + li.total, 0);
+    await transaction.update((t) => {
+      t.totalAmount = newTotal;
+    });
+
+    // 3. Write audit log
+    await database.get('audit_logs').create((log: any) => {
+      log.timestamp = new Date();
+      log.userId = actingUser.id;
+      log.userName = actingUser.displayName;
+      log.actionType = 'APPLY_DISCOUNT';
+      log.entityType = 'TRANSACTION';
+      log.entityId = lineItem.transactionId;
+      log.before = JSON.stringify({ discountType: prevDiscountType, discountValue: prevDiscountValue });
+      log.after = JSON.stringify({ discountType: '', discountValue: 0 });
+      log.note = '';
+    });
+  });
+};
+
 // ─── Add-Ons ──────────────────────────────────────────────────────────────────
 
 /**
