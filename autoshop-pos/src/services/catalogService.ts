@@ -64,6 +64,16 @@ export const observeAddOns = () =>
     .query(Q.where('is_active', true), Q.sortBy('name', Q.asc))
     .observe();
 
+/**
+ * Observable query for ALL add-ons (active and inactive) sorted alphabetically.
+ * Subscribed to by the AddOnCatalogScreen for management purposes.
+ */
+export const observeAllAddOns = () =>
+  database
+    .get<AddOnModel>('add_ons')
+    .query(Q.sortBy('name', Q.asc))
+    .observe();
+
 // ─── Categories ───────────────────────────────────────────────────────────────
 
 /**
@@ -232,6 +242,20 @@ export const deactivateAddOn = async (
   await database.write(async () => {
     await model.update((a) => {
       a.isActive = false;
+    });
+  });
+};
+
+/**
+ * Re-activates a previously deactivated add-on.
+ * No audit log (not in audit matrix).
+ */
+export const activateAddOn = async (id: string): Promise<void> => {
+  const model = await database.get<AddOnModel>('add_ons').find(id);
+
+  await database.write(async () => {
+    await model.update((a) => {
+      a.isActive = true;
     });
   });
 };
