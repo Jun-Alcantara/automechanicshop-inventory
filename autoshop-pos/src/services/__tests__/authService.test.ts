@@ -1,6 +1,6 @@
 // Force production code path — the __DEV__ shortcut bypasses verifyPin which
 // breaks the PBKDF2 tests.
-(global as unknown as Record<string, unknown>).__DEV__ = false;
+(globalThis as unknown as Record<string, unknown>).__DEV__ = false;
 
 import { authenticateByPin, getUserById, isPinTaken, mapUserModel } from '../authService';
 
