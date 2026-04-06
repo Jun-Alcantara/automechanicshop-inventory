@@ -213,7 +213,7 @@ export const UserFormScreen: React.FC = () => {
               <Switch
                 value={userToEdit?.isMainAdmin ? true : selectedPermissions.has(permission)}
                 onValueChange={() => togglePermission(permission)}
-                disabled={userToEdit?.isMainAdmin}
+                disabled={userToEdit?.isMainAdmin || (permission === 'MANAGE_USERS' && !currentUser?.isMainAdmin)}
                 trackColor={{ false: Colors.gray300, true: Colors.primary }}
               />
             </View>
