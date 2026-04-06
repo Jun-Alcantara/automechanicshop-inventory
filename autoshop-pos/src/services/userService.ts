@@ -3,7 +3,7 @@ import { Q } from '@nozbe/watermelondb';
 import { UserModel } from '../models/UserModel';
 import { hashPin, generateSalt, computePinLookupHash, verifyPin } from '../utils/pinHash';
 import { PERMISSIONS } from '../constants/permissions';
-import type { User } from '../types';
+import type { User, Permission } from '../types';
 import { mapUserModel } from './authService';
 
 /**
@@ -94,7 +94,7 @@ export const updateUser = async (
   updates: {
     displayName?: string;
     pin?: string;
-    permissions?: string[];
+    permissions?: Permission[];
     isActive?: boolean;
   }
 ): Promise<User> => {
@@ -163,6 +163,4 @@ export const changeOwnPin = async (
       (u as any).updatedBy = user.id;
     });
   });
-};
-);
 };
