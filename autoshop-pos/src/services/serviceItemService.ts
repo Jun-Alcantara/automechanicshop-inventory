@@ -24,6 +24,17 @@ interface CreateServiceInput {
   basePrice: number;
 }
 
+// ─── Reads ────────────────────────────────────────────────────────────────────
+
+export const getServiceItemById = async (id: string): Promise<ServiceItem | null> => {
+  try {
+    const model = await database.get<ServiceModel>('services').find(id);
+    return mapServiceModel(model);
+  } catch {
+    return null;
+  }
+};
+
 // ─── Observable ───────────────────────────────────────────────────────────────
 
 /**
