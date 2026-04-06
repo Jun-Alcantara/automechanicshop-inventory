@@ -44,6 +44,68 @@ interface CreateTransactionInput {
   cashierId: string;
 }
 
+// ─── Dashboard ───────────────────────────────────────────────────────────────
+
+export interface TopSellingPart {
+  refId: string;
+  name: string;
+  quantity: number;
+}
+
+export interface TodayStats {
+  totalSales: number;
+  orderCount: number;
+  topSellingParts: TopSellingPart[];
+}
+
+/**
+ * Fetches today's dashboard stats: total sales, order count, and top 5
+ * selling parts (by quantity) from FINALIZED transactions.
+ */
+export const fetchTodayStats = async (): Promise<TodayStats> => {
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const startOfTodayMs = startOfToday.getTime();
+
+  const transactions = await database
+    .get<TransactionModel>('transactions')
+    .query(
+      Q.where('status', 'FINALIZED'),
+      Q.where('finalized_at', Q.gte(startOfTodayMs))
+    )
+    .fetch();
+
+  const totalSales = transactions.reduce((sum, t) => sum + t.totalAmount, 0);
+  const orderCount = transactions.length;
+
+  const partMap = new Map<string, { name: string; quantity: number }>();
+  for (const transaction of transactions) {
+    const lineItems = await database
+      .get<LineItemModel>('line_items')
+      .query(
+        Q.where('transaction_id', transaction.id),
+        Q.where('type', 'PRODUCT')
+      )
+      .fetch();
+
+    for (const li of lineItems) {
+      const existing = partMap.get(li.refId);
+      if (existing) {
+        existing.quantity += li.quantity;
+      } else {
+        partMap.set(li.refId, { name: li.name, quantity: li.quantity });
+      }
+    }
+  }
+
+  const topSellingParts = Array.from(partMap.entries())
+    .map(([refId, { name, quantity }]) => ({ refId, name, quantity }))
+    .sort((a, b) => b.quantity - a.quantity)
+    .slice(0, 5);
+
+  return { totalSales, orderCount, topSellingParts };
+};
+
 // ─── Observables ─────────────────────────────────────────────────────────────
 
 /**
