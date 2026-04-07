@@ -1,7 +1,17 @@
 import React, { Component, ErrorInfo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import * as Updates from 'expo-updates';
+import { View, Text, StyleSheet, DevSettings } from 'react-native';
 import { AppButton } from './AppButton';
+
+// Lazily require expo-updates so a missing native module (e.g. Expo Go)
+// doesn't crash the app at startup. Falls back to DevSettings in dev.
+const reloadApp = () => {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require('expo-updates').reloadAsync();
+  } catch {
+    DevSettings.reload();
+  }
+};
 
 interface State {
   hasError: boolean;
@@ -25,7 +35,7 @@ export class ErrorBoundary extends Component<{ children: React.ReactNode }, Stat
         <View style={styles.container}>
           <Text style={styles.title}>Something went wrong</Text>
           <Text style={styles.message}>{this.state.error?.message}</Text>
-          <AppButton label="Restart" onPress={() => Updates.reloadAsync()} />
+          <AppButton label="Restart" onPress={reloadApp} />
         </View>
       );
     }
