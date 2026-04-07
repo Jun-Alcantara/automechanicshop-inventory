@@ -6,7 +6,7 @@ import { AppInput } from '@components/common/AppInput';
 import { AppButton } from '@components/common/AppButton';
 import { Colors, Spacing, Typography, BorderRadius } from '@constants/theme';
 import { useCatalogStore } from '@stores/catalogStore';
-import type { AddOn } from 'src/types';
+import type { AddOn } from '@/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
