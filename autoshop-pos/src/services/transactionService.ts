@@ -107,6 +107,24 @@ export const fetchTodayStats = async (): Promise<TodayStats> => {
 };
 
 /**
+ * Fetches transactions matching any of the given statuses, sorted newest first.
+ * Used by TransactionListScreen to load the history section.
+ */
+export const listTransactions = async (
+  options: { statuses: string[] }
+): Promise<Transaction[]> => {
+  const models = await database
+    .get<TransactionModel>('transactions')
+    .query(
+      Q.or(...options.statuses.map((s) => Q.where('status', s))),
+      Q.sortBy('created_at', Q.desc)
+    )
+    .fetch();
+
+  return models.map(mapTransactionModel);
+};
+
+/**
  * Fetches FINALIZED transactions whose finalizedAt falls within [startMs, endMs].
  */
 export const fetchTransactionsByDateRange = async (
