@@ -10,6 +10,10 @@ export type RootStackParamList = {
   MainTabs: NavigatorScreenParams<MainTabParamList>;
   BarcodeScanner: undefined;
   CustomerSearch: undefined;
+  DiscountPicker: {
+    currentDiscountType?: 'FIXED' | 'PERCENTAGE';
+    currentDiscountValue?: number;
+  };
 };
 
 // ─── Main Tab Navigator ───────────────────────────────────────────────────────
