@@ -153,9 +153,12 @@ export const CustomerSearchModal: React.FC = () => {
   const handleNewCustomer = useCallback(() => {
     // Navigate to CustomerForm; on return useFocusEffect will re-query
     // and the caller can wire auto-select via setCustomerSearchCallback
-    (navigation as any).navigate('Admin', {
-      screen: 'CustomerForm',
-      params: { customerId: undefined },
+    (navigation as any).navigate('MainTabs', {
+      screen: 'Admin',
+      params: {
+        screen: 'CustomerForm',
+        params: { customerId: undefined },
+      },
     });
   }, [navigation]);
 
