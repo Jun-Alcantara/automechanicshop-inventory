@@ -17,6 +17,7 @@ import { ProductCard } from '@components/inventory/ProductCard';
 import { useInventoryStore } from '@stores/inventoryStore';
 import { useHasPermission } from '@hooks/useHasPermission';
 import { formatPHP } from '@utils/formatCurrency';
+import { setBarcodeCallback } from '@screens/modals/BarcodeScannerModal';
 import { Colors, Spacing, Typography, BorderRadius } from '@constants/theme';
 import type { InventoryStackScreenProps } from '@navigation/types';
 import type { Product, ServiceItem } from '@/types';
@@ -31,6 +32,11 @@ export const InventoryListScreen: React.FC<Props> = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState<Tab>('products');
   const [query, setQuery] = useState('');
   const [showManageMenu, setShowManageMenu] = useState(false);
+
+  const handleScanBarcode = () => {
+    setBarcodeCallback((barcode) => setQuery(barcode));
+    (navigation as any).navigate('BarcodeScanner');
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -155,12 +161,17 @@ export const InventoryListScreen: React.FC<Props> = ({ navigation }) => {
       {/* Products Tab */}
       {activeTab === 'products' && (
         <View style={styles.content}>
-          <AppInput
-            placeholder="Search by name or barcode…"
-            value={query}
-            onChangeText={setQuery}
-            containerStyle={styles.search}
-          />
+          <View style={styles.searchRow}>
+            <AppInput
+              placeholder="Search by name or barcode…"
+              value={query}
+              onChangeText={setQuery}
+              containerStyle={styles.searchInput}
+            />
+            <TouchableOpacity style={styles.scanButton} onPress={handleScanBarcode} activeOpacity={0.7}>
+              <Text style={styles.scanButtonText}>Scan</Text>
+            </TouchableOpacity>
+          </View>
           <FlatList
             data={filteredProducts}
             keyExtractor={(item) => item.id}
@@ -185,7 +196,7 @@ export const InventoryListScreen: React.FC<Props> = ({ navigation }) => {
             placeholder="Search by name…"
             value={query}
             onChangeText={setQuery}
-            containerStyle={styles.search}
+            containerStyle={styles.serviceSearch}
           />
           <FlatList
             data={filteredServices}
@@ -256,7 +267,29 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
-  search: {
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    margin: Spacing.md,
+    gap: Spacing.sm,
+  },
+  searchInput: {
+    flex: 1,
+  },
+  scanButton: {
+    height: 44,
+    paddingHorizontal: Spacing.md,
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scanButtonText: {
+    color: Colors.white,
+    fontSize: Typography.sm,
+    fontWeight: '600',
+  },
+  serviceSearch: {
     margin: Spacing.md,
   },
   list: {

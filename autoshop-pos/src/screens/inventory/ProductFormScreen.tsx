@@ -30,6 +30,7 @@ import {
 import { VAT_TYPES, VAT_LABELS } from '@constants/vatTypes';
 import type { VatType } from '@constants/vatTypes';
 import { Colors, Spacing, Typography, BorderRadius } from '@constants/theme';
+import { setBarcodeCallback } from '@screens/modals/BarcodeScannerModal';
 import type { InventoryStackParamList } from '@navigation/types';
 import type { Category, Supplier } from '@/types';
 
@@ -264,8 +265,8 @@ export const ProductFormScreen: React.FC = () => {
   };
 
   const handleScanBarcode = () => {
-    // AMSPOS-72: replace with setBarcodeCallback + BarcodeScannerModal navigation when implemented
-    Alert.alert('Coming Soon', 'Barcode scanning will be available shortly.');
+    setBarcodeCallback((scannedBarcode) => setBarcode(scannedBarcode));
+    (navigation as any).navigate('BarcodeScanner');
   };
 
   const checkDuplicateBarcode = async (value: string): Promise<boolean> => {

@@ -8,6 +8,7 @@ export type RootStackParamList = {
   InitSetup: undefined;
   PinLock: undefined;
   MainTabs: NavigatorScreenParams<MainTabParamList>;
+  BarcodeScanner: undefined;
 };
 
 // ─── Main Tab Navigator ───────────────────────────────────────────────────────
