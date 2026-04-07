@@ -9,6 +9,7 @@ export type RootStackParamList = {
   PinLock: undefined;
   MainTabs: NavigatorScreenParams<MainTabParamList>;
   BarcodeScanner: undefined;
+  CustomerSearch: undefined;
 };
 
 // ─── Main Tab Navigator ───────────────────────────────────────────────────────

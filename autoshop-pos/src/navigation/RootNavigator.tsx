@@ -7,6 +7,7 @@ import { AppListeners } from '@components/layout/AppListeners';
 import { InitSetupScreen } from '@screens/auth/InitSetupScreen';
 import { PinLockScreen } from '@screens/auth/PinLockScreen';
 import { BarcodeScannerModal } from '@screens/modals/BarcodeScannerModal';
+import { CustomerSearchModal } from '@screens/modals/CustomerSearchModal';
 import { MainTabNavigator } from './MainTabNavigator';
 import type { RootStackParamList } from './types';
 
@@ -45,6 +46,11 @@ export const RootNavigator: React.FC = () => {
         <Stack.Screen
           name="BarcodeScanner"
           component={BarcodeScannerModal}
+          options={{ presentation: 'modal', headerShown: false }}
+        />
+        <Stack.Screen
+          name="CustomerSearch"
+          component={CustomerSearchModal}
           options={{ presentation: 'modal', headerShown: false }}
         />
       </Stack.Navigator>
