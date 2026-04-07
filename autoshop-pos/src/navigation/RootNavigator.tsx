@@ -9,6 +9,7 @@ import { PinLockScreen } from '@screens/auth/PinLockScreen';
 import { BarcodeScannerModal } from '@screens/modals/BarcodeScannerModal';
 import { CustomerSearchModal } from '@screens/modals/CustomerSearchModal';
 import { DiscountPickerModal } from '@screens/modals/DiscountPickerModal';
+import { AddOnPickerModal } from '@screens/modals/AddOnPickerModal';
 import { MainTabNavigator } from './MainTabNavigator';
 import type { RootStackParamList } from './types';
 
@@ -57,6 +58,11 @@ export const RootNavigator: React.FC = () => {
         <Stack.Screen
           name="DiscountPicker"
           component={DiscountPickerModal}
+          options={{ presentation: 'modal', headerShown: false }}
+        />
+        <Stack.Screen
+          name="AddOnPicker"
+          component={AddOnPickerModal}
           options={{ presentation: 'modal', headerShown: false }}
         />
       </Stack.Navigator>

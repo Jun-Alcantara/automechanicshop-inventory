@@ -14,6 +14,7 @@ export type RootStackParamList = {
     currentDiscountType?: 'FIXED' | 'PERCENTAGE';
     currentDiscountValue?: number;
   };
+  AddOnPicker: undefined;
 };
 
 // ─── Main Tab Navigator ───────────────────────────────────────────────────────
