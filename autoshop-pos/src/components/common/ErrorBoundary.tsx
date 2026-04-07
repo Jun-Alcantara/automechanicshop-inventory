@@ -1,7 +1,7 @@
 import React, { Component, ErrorInfo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import * as Updates from 'expo-updates';
-import { AppButton } from 'src/components/common/AppButton';
+import { AppButton } from './AppButton';
 
 interface State {
   hasError: boolean;
