@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { Subscription } from 'rxjs';
-import { observeCategories, observeSuppliers, observeAllAddOns } from '../services/catalogService';
+import { observeCategories, observeSuppliers, observeAddOns } from '../services/catalogService';
 import type { Category, Supplier, AddOn } from '../types';
 import type { CategoryModel } from '../models/CategoryModel';
 import type { SupplierModel } from '../models/SupplierModel';
@@ -65,7 +65,7 @@ export const useCatalogStore = create<CatalogStore>((set, get) => ({
       next: (models) => set({ suppliers: models.map(mapSupplier) }),
       error: (e) => set({ error: e }),
     });
-    const as = observeAllAddOns().subscribe({
+    const as = observeAddOns().subscribe({
       next: (models) => set({ addOns: models.map(mapAddOn) }),
       error: (e) => set({ error: e }),
     });
