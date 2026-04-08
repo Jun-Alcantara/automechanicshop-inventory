@@ -90,7 +90,7 @@ export const InventoryListScreen: React.FC<Props> = ({ navigation }) => {
   );
 
   return (
-    <ScreenWrapper>
+    <ScreenWrapper noHeader>
       {/* Tab Bar */}
       <View style={styles.tabBar}>
         <TouchableOpacity

@@ -25,7 +25,7 @@ export const DashboardScreen: React.FC = () => {
   );
 
   return (
-    <ScreenWrapper>
+    <ScreenWrapper noHeader>
       <ScrollView contentContainerStyle={styles.container}>
         {/* KPI Cards */}
         <View style={styles.kpiRow}>

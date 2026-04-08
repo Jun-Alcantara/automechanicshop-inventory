@@ -96,17 +96,26 @@ export type RootStackScreenProps<T extends keyof RootStackParamList> =
 export type TransactionsStackScreenProps<T extends keyof TransactionsStackParamList> =
   CompositeScreenProps<
     StackScreenProps<TransactionsStackParamList, T>,
-    BottomTabScreenProps<MainTabParamList>
+    CompositeScreenProps<
+      BottomTabScreenProps<MainTabParamList>,
+      StackScreenProps<RootStackParamList>
+    >
   >;
 
 export type InventoryStackScreenProps<T extends keyof InventoryStackParamList> =
   CompositeScreenProps<
     StackScreenProps<InventoryStackParamList, T>,
-    BottomTabScreenProps<MainTabParamList>
+    CompositeScreenProps<
+      BottomTabScreenProps<MainTabParamList>,
+      StackScreenProps<RootStackParamList>
+    >
   >;
 
 export type AdminStackScreenProps<T extends keyof AdminStackParamList> =
   CompositeScreenProps<
     StackScreenProps<AdminStackParamList, T>,
-    BottomTabScreenProps<MainTabParamList>
+    CompositeScreenProps<
+      BottomTabScreenProps<MainTabParamList>,
+      StackScreenProps<RootStackParamList>
+    >
   >;
