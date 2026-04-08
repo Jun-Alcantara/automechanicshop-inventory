@@ -473,6 +473,73 @@ export const processReturn = async (
   });
 };
 
+// ─── Read by ID ──────────────────────────────────────────────────────────────
+
+/**
+ * Fetches a single transaction by ID, including its line items (with add-ons)
+ * and payment records. Used by TransactionHistoryDetailScreen.
+ */
+export const getTransactionById = async (transactionId: string): Promise<Transaction> => {
+  const model = await database.get<TransactionModel>('transactions').find(transactionId);
+  const lineItemModels = await database
+    .get<LineItemModel>('line_items')
+    .query(Q.where('transaction_id', transactionId))
+    .fetch();
+
+  const lineItems = await Promise.all(
+    lineItemModels.map(async (li): Promise<import('../types').LineItem> => {
+      const addOnModels = await database
+        .get<LineItemAddOnModel>('line_item_add_ons')
+        .query(Q.where('line_item_id', li.id))
+        .fetch();
+      return {
+        id: li.id,
+        transactionId: li.transactionId,
+        type: li.type,
+        refId: li.refId,
+        name: li.name,
+        unitPrice: li.unitPrice,
+        quantity: li.quantity,
+        vatType: li.vatType as import('../types').VatType,
+        discountType: li.discountType,
+        discountValue: li.discountValue,
+        subtotal: li.subtotal,
+        vatAmount: li.vatAmount,
+        discountAmount: li.discountAmount,
+        total: li.total,
+        addOns: addOnModels.map((ao) => ({
+          id: ao.id,
+          lineItemId: ao.lineItemId,
+          addOnId: ao.addOnId,
+          name: ao.name,
+          amount: ao.amount,
+          isOnTheFly: ao.isOnTheFly,
+        })),
+      };
+    })
+  );
+
+  const paymentModels = await database
+    .get<PaymentModel>('payments')
+    .query(Q.where('transaction_id', transactionId))
+    .fetch();
+
+  const payments: import('../types').Payment[] = paymentModels.map((p) => ({
+    id: p.id,
+    transactionId: p.transactionId,
+    method: p.method as import('../types').PaymentMethod,
+    amount: p.amount,
+    referenceNumber: p.referenceNumber,
+    receiptPhotoUri: p.receiptPhotoUri,
+  }));
+
+  return {
+    ...mapTransactionModel(model),
+    lineItems,
+    payments,
+  };
+};
+
 // ─── Line Items ───────────────────────────────────────────────────────────────
 
 /**
@@ -784,6 +851,19 @@ export const applyAddOn = async (
     await transaction.update((t) => {
       t.totalAmount = newTotal;
     });
+
+    // 4. Write audit log
+    await database.get('audit_logs').create((log: any) => {
+      log.timestamp = new Date();
+      log.userId = actingUser.id;
+      log.userName = actingUser.displayName;
+      log.actionType = 'ADD_ITEM';
+      log.entityType = 'TRANSACTION';
+      log.entityId = lineItem.transactionId;
+      log.before = '';
+      log.after = JSON.stringify({ lineItemId, addOnName: input.name, amount: input.amount });
+      log.note = '';
+    });
   });
 };
 
@@ -816,6 +896,19 @@ export const removeAddOn = async (
     const newTotal = allLineItems.reduce((sum, li) => sum + li.total, 0);
     await transaction.update((t) => {
       t.totalAmount = newTotal;
+    });
+
+    // 4. Write audit log
+    await database.get('audit_logs').create((log: any) => {
+      log.timestamp = new Date();
+      log.userId = actingUser.id;
+      log.userName = actingUser.displayName;
+      log.actionType = 'REMOVE_ITEM';
+      log.entityType = 'TRANSACTION';
+      log.entityId = lineItem.transactionId;
+      log.before = JSON.stringify({ addOnRecordId, addOnName: addOn.name, amount: addOn.amount });
+      log.after = '';
+      log.note = '';
     });
   });
 };
