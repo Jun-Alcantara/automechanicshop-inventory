@@ -1,19 +1,25 @@
 import React from 'react';
 import { StyleSheet, ViewStyle } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, Edge } from 'react-native-safe-area-context';
 import { Colors } from '@constants/theme';
 import { useSessionStore } from '@stores/sessionStore';
 
 interface ScreenWrapperProps {
   children: React.ReactNode;
   style?: ViewStyle;
+  /** Pass true for screens with headerShown: false that need top safe area inset */
+  noHeader?: boolean;
 }
 
-export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({ children, style }) => {
+export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({ children, style, noHeader }) => {
   const { refreshActivity } = useSessionStore();
+  const edges: Edge[] = noHeader
+    ? ['top', 'bottom', 'left', 'right']
+    : ['bottom', 'left', 'right'];
 
   return (
     <SafeAreaView
+      edges={edges}
       style={[styles.container, style]}
       onStartShouldSetResponder={() => {
         refreshActivity();

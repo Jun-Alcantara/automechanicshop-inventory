@@ -129,7 +129,7 @@ export const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
   );
 
   return (
-    <ScreenWrapper>
+    <ScreenWrapper noHeader>
       {/* In Progress section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>In Progress</Text>

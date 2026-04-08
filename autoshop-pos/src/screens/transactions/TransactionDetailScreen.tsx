@@ -165,8 +165,12 @@ export const TransactionDetailScreen: React.FC<Props> = ({ route, navigation }) 
       }
     });
     navigation.navigate('DiscountPicker', {
-      currentDiscountType: (lineItem.discountType as 'FIXED' | 'PERCENTAGE') || undefined,
-      currentDiscountValue: lineItem.discountValue || undefined,
+      ...(lineItem.discountType
+        ? { currentDiscountType: lineItem.discountType as 'FIXED' | 'PERCENTAGE' }
+        : {}),
+      ...(lineItem.discountValue
+        ? { currentDiscountValue: lineItem.discountValue }
+        : {}),
     });
   };
 
