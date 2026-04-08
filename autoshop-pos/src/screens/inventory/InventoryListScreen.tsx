@@ -181,9 +181,12 @@ export const InventoryListScreen: React.FC<Props> = ({ navigation }) => {
               filteredProducts.length === 0 && styles.listEmpty,
             ]}
             ListEmptyComponent={
-              query
-                ? <EmptyState title="No products found" subtitle="Try a different name or barcode." />
-                : <EmptyState title="No products found" />
+              loading ? null : (
+                <EmptyState
+                  title="No Products Found"
+                  subtitle="No products found. Tap + to add your first product."
+                />
+              )
             }
           />
         </View>
@@ -207,9 +210,12 @@ export const InventoryListScreen: React.FC<Props> = ({ navigation }) => {
               filteredServices.length === 0 && styles.listEmpty,
             ]}
             ListEmptyComponent={
-              query
-                ? <EmptyState title="No services found" subtitle="Try a different name." />
-                : <EmptyState title="No service items found" />
+              loading ? null : (
+                <EmptyState
+                  title="No Services Found"
+                  subtitle="No services found. Tap + to add your first service."
+                />
+              )
             }
           />
         </View>
