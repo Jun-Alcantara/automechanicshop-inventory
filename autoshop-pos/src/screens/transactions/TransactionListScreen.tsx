@@ -14,6 +14,7 @@ import { useHasPermission } from '@hooks/useHasPermission';
 import { PERMISSIONS } from '@constants/permissions';
 import { ScreenWrapper } from '@components/layout/ScreenWrapper';
 import { TransactionCard } from '@components/transaction/TransactionCard';
+import { EmptyState } from '@components/common/EmptyState';
 import { Colors, Spacing, Typography, BorderRadius } from '@constants/theme';
 import { formatPHP } from '@utils/formatCurrency';
 import { database } from '@services/database';
@@ -142,7 +143,10 @@ export const TransactionListScreen: React.FC<Props> = ({ navigation }) => {
             renderItem={renderInProgressItem}
             contentContainerStyle={styles.listContent}
             ListEmptyComponent={
-              <Text style={styles.empty}>No active transactions</Text>
+              <EmptyState
+                title="No Transactions"
+                subtitle="No in-progress transactions. Tap + to start one."
+              />
             }
             scrollEnabled={false}
           />
