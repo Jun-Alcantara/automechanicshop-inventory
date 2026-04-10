@@ -58,8 +58,8 @@ import { useTransactionDraftStore } from '@stores/transactionDraftStore';
 
 const mockGetTransaction = getTransactionById as jest.Mock;
 const mockFinalizeTransaction = finalizeTransaction as jest.Mock;
-const mockUseSessionStore = useSessionStore as jest.Mock;
-const mockUseTransactionDraftStore = useTransactionDraftStore as jest.Mock;
+const mockUseSessionStore = useSessionStore as unknown as jest.Mock;
+const mockUseTransactionDraftStore = useTransactionDraftStore as unknown as jest.Mock;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
