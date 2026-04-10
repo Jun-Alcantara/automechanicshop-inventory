@@ -125,10 +125,6 @@ export const NewTransactionScreen: React.FC = () => {
   return (
     <ScreenWrapper>
       <View style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>New Transaction</Text>
-        </View>
 
         {/* Customer section */}
         <View style={styles.section}>
