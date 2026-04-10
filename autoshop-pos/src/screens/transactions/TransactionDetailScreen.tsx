@@ -29,6 +29,7 @@ import { VehicleModel } from '../../models/VehicleModel';
 import { calculateTransactionTotals } from '@utils/calculateTransaction';
 import { formatPHP } from '@utils/formatCurrency';
 import { showNegativeStockWarning, showUnknownBarcodeAlert } from '@utils/transactionAlerts';
+import { Ionicons } from '@expo/vector-icons';
 import { PERMISSIONS } from '@constants/permissions';
 import { Colors, Spacing, Typography, BorderRadius } from '@constants/theme';
 import type { Product, ServiceItem, LineItem } from '../../types';
@@ -313,7 +314,7 @@ export const TransactionDetailScreen: React.FC<Props> = ({ route, navigation }) 
 
   if (loading) {
     return (
-      <ScreenWrapper>
+      <ScreenWrapper noHeader>
         <ActivityIndicator style={styles.loader} color={Colors.primary} />
       </ScreenWrapper>
     );
@@ -322,19 +323,24 @@ export const TransactionDetailScreen: React.FC<Props> = ({ route, navigation }) 
   // ─── Main render ──────────────────────────────────────────────────────────
 
   return (
-    <ScreenWrapper>
+    <ScreenWrapper noHeader>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         {/* Section 1: Header */}
         <View style={styles.header}>
-          <Text style={styles.headerLabel} numberOfLines={1}>
-            {headerLabel}
-          </Text>
-          <Text style={styles.transactionId}>
-            #{transactionId.slice(-8).toUpperCase()}
-          </Text>
+          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.navigate('TransactionList')}>
+            <Ionicons name="arrow-back" size={24} color={Colors.primary} />
+          </TouchableOpacity>
+          <View style={styles.headerContent}>
+            <Text style={styles.headerLabel} numberOfLines={1}>
+              {headerLabel}
+            </Text>
+            <Text style={styles.transactionId}>
+              #{transactionId.slice(-8).toUpperCase()}
+            </Text>
+          </View>
         </View>
 
         {/* Section 2: Item search bar */}
@@ -448,12 +454,24 @@ const styles = StyleSheet.create({
 
   // Header
   header: {
-    paddingHorizontal: Spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: Spacing.sm,
+    paddingRight: Spacing.md,
     paddingTop: Spacing.lg,
     paddingBottom: Spacing.md,
     backgroundColor: Colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
+  },
+  backBtn: {
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    marginRight: Spacing.xs,
+  },
+
+  headerContent: {
+    flex: 1,
   },
   headerLabel: {
     fontSize: Typography.lg,
@@ -670,3 +688,5 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
 });
+
+
