@@ -82,10 +82,13 @@ export const CustomerFormScreen: React.FC = () => {
 
   const doCreate = async () => {
     if (!currentUser) return;
-    await createCustomer(
-      { type, name: name.trim(), phone: phone.trim() || undefined, email: email.trim() || undefined },
-      currentUser
-    );
+    const input: { type: CustomerType; name: string; phone?: string; email?: string } = {
+      type,
+      name: name.trim(),
+    };
+    if (phone.trim()) input.phone = phone.trim();
+    if (email.trim()) input.email = email.trim();
+    await createCustomer(input, currentUser);
     navigation.goBack();
   };
 
@@ -143,11 +146,12 @@ export const CustomerFormScreen: React.FC = () => {
     setIsSaving(true);
     try {
       if (isEditMode && customerId) {
-        await updateCustomer(
-          customerId,
-          { name: name.trim(), phone: phone.trim() || undefined, email: email.trim() || undefined },
-          currentUser
-        );
+        const patch: { name?: string; phone?: string; email?: string } = {
+          name: name.trim(),
+        };
+        if (phone.trim()) patch.phone = phone.trim();
+        if (email.trim()) patch.email = email.trim();
+        await updateCustomer(customerId, patch, currentUser);
       } else {
         await doCreate();
       }
