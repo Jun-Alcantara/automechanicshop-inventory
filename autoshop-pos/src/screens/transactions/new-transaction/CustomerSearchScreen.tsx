@@ -1,20 +1,21 @@
 import React from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
-
 import { ScreenWrapper } from '@components/layout/ScreenWrapper';
 import { CustomerSearchList } from '@components/customers/CustomerSearchList';
-
 import type { Customer } from '@/types';
-import type { AdminStackParamList } from '@navigation/types';
+import type { TransactionsStackParamList } from '@navigation/types';
 
-type NavigationProp = StackNavigationProp<AdminStackParamList, 'CustomerList'>;
+type NavigationProp = StackNavigationProp<TransactionsStackParamList, 'CustomerSearch'>;
 
-export const CustomerListScreen: React.FC = () => {
+export const CustomerSearchScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
 
   const handleSelectCustomer = (customer: Customer) => {
-    navigation.navigate('CustomerDetail', { customerId: customer.id });
+    navigation.navigate('VehicleSelection', {
+      customerId: customer.id,
+      customerName: customer.name,
+    });
   };
 
   const handleNewCustomer = () => {

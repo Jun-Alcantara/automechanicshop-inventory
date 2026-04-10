@@ -31,6 +31,9 @@ export type MainTabParamList = {
 export type TransactionsStackParamList = {
   TransactionList: undefined;
   NewTransaction: undefined;
+  CustomerSearch: undefined;
+  CustomerForm: { customerId?: string };
+  VehicleSelection: { customerId: string; customerName: string };
   TransactionDetail: { transactionId: string };
   Payment: { transactionId: string };
   Receipt: { transactionId: string };
