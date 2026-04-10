@@ -1,16 +1,27 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
-import { AppInput } from '@components/common/AppInput';
-import { AppButton } from '@components/common/AppButton';
-import { Colors, Spacing, Typography } from '@constants/theme';
+import { Colors, Spacing, Typography, BorderRadius } from '@constants/theme';
 import { useSessionStore } from '@stores/sessionStore';
 import { logEvent } from '@services/auditService';
 import { authenticateByPin } from '@services/authService';
 import type { RootStackParamList } from '@navigation/types';
 
 type Nav = StackNavigationProp<RootStackParamList, 'PinLock'>;
+
+const PIN_LENGTH = 6;
+const KEY_SIZE = 76;
+const KEY_GAP = 14;
+
+const NUMPAD_KEYS = [
+  '1', '2', '3',
+  '4', '5', '6',
+  '7', '8', '9',
+  'backspace', '0', 'check',
+] as const;
+
+type NumpadKey = typeof NUMPAD_KEYS[number];
 
 export const PinLockScreen: React.FC = () => {
   const navigation = useNavigation<Nav>();
@@ -21,8 +32,8 @@ export const PinLockScreen: React.FC = () => {
 
   const isLocked = status === 'LOCKED';
 
-  const handleSubmit = async () => {
-    if (pin.length !== 6) {
+  const handleSubmit = async (currentPin: string) => {
+    if (currentPin.length !== PIN_LENGTH) {
       setError('Enter your 6-digit PIN.');
       return;
     }
@@ -32,7 +43,7 @@ export const PinLockScreen: React.FC = () => {
 
     try {
       if (isLocked) {
-        const success = await unlock(pin);
+        const success = await unlock(currentPin);
         if (!success) {
           setError('Incorrect PIN. Try again.');
           setPin('');
@@ -50,7 +61,7 @@ export const PinLockScreen: React.FC = () => {
           });
         }
       } else {
-        const matchedUser = await authenticateByPin(pin);
+        const matchedUser = await authenticateByPin(currentPin);
         if (!matchedUser) {
           setError('Incorrect PIN. Try again.');
           setPin('');
@@ -74,6 +85,26 @@ export const PinLockScreen: React.FC = () => {
     }
   };
 
+  const handleKeyPress = (key: NumpadKey) => {
+    if (loading) return;
+
+    if (key === 'backspace') {
+      setPin(prev => prev.slice(0, -1));
+      setError('');
+    } else if (key === 'check') {
+      handleSubmit(pin);
+    } else {
+      if (pin.length < PIN_LENGTH) {
+        const newPin = pin + key;
+        setPin(newPin);
+        setError('');
+        if (newPin.length === PIN_LENGTH) {
+          handleSubmit(newPin);
+        }
+      }
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.appName}>AutoShop POS</Text>
@@ -87,24 +118,53 @@ export const PinLockScreen: React.FC = () => {
         <Text style={styles.subtitle}>Enter your PIN to continue</Text>
       )}
 
-      <AppInput
-        value={pin}
-        onChangeText={v => { setPin(v); setError(''); }}
-        keyboardType="numeric"
-        maxLength={6}
-        secureTextEntry
-        placeholder="••••••"
-        error={error}
-        containerStyle={styles.pinInput}
-        autoFocus
-      />
+      {/* PIN digit boxes */}
+      <View style={styles.pinRow}>
+        {Array.from({ length: PIN_LENGTH }).map((_, i) => (
+          <View
+            key={i}
+            style={[
+              styles.pinBox,
+              i < pin.length && styles.pinBoxFilled,
+              !!error && styles.pinBoxError,
+            ]}
+          >
+            {i < pin.length && <View style={styles.pinDot} />}
+          </View>
+        ))}
+      </View>
 
-      <AppButton
-        label={isLocked ? 'Unlock' : 'Log In'}
-        onPress={handleSubmit}
-        loading={loading}
-        fullWidth
-      />
+      {error ? <Text style={styles.errorText}>{error}</Text> : <View style={styles.errorPlaceholder} />}
+
+      {/* Numpad 3 x 4 */}
+      <View style={styles.numpad}>
+        {NUMPAD_KEYS.map(key => {
+          const isCheck = key === 'check';
+          const isBackspace = key === 'backspace';
+          return (
+            <TouchableOpacity
+              key={key}
+              style={[
+                styles.numKey,
+                isCheck && styles.numKeyCheck,
+                isBackspace && styles.numKeyBackspace,
+                loading && styles.numKeyDisabled,
+              ]}
+              onPress={() => handleKeyPress(key)}
+              disabled={loading}
+              activeOpacity={0.65}
+            >
+              {isBackspace ? (
+                <Text style={[styles.numKeyText, styles.numKeySymbol]}>⌫</Text>
+              ) : isCheck ? (
+                <Text style={[styles.numKeyText, styles.numKeyCheckText]}>✓</Text>
+              ) : (
+                <Text style={styles.numKeyText}>{key}</Text>
+              )}
+            </TouchableOpacity>
+          );
+        })}
+      </View>
     </View>
   );
 };
@@ -138,5 +198,89 @@ const styles = StyleSheet.create({
     fontWeight: Typography.semiBold,
     color: Colors.gray900,
   },
-  pinInput: { width: '100%', marginBottom: Spacing.md },
+
+  // PIN boxes
+  pinRow: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    marginBottom: Spacing.sm,
+  },
+  pinBox: {
+    width: 54,
+    height: 62,
+    borderRadius: BorderRadius.md,
+    borderWidth: 2,
+    borderColor: Colors.border,
+    backgroundColor: Colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pinBoxFilled: {
+    borderColor: Colors.primary,
+    backgroundColor: Colors.primaryLight,
+  },
+  pinBoxError: {
+    borderColor: Colors.danger,
+    backgroundColor: Colors.dangerLight,
+  },
+  pinDot: {
+    width: 15,
+    height: 15,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.primary,
+  },
+  errorText: {
+    fontSize: Typography.sm,
+    color: Colors.danger,
+    marginBottom: Spacing.md,
+    textAlign: 'center',
+  },
+  errorPlaceholder: {
+    height: Typography.sm + Spacing.md,
+  },
+
+  // Numpad
+  numpad: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    width: KEY_SIZE * 3 + KEY_GAP * 2,
+    gap: KEY_GAP,
+  },
+  numKey: {
+    width: KEY_SIZE,
+    height: KEY_SIZE,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: Colors.black,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  numKeyCheck: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  numKeyBackspace: {
+    backgroundColor: Colors.gray100,
+    borderColor: Colors.border,
+  },
+  numKeyDisabled: {
+    opacity: 0.45,
+  },
+  numKeyText: {
+    fontSize: Typography.xxl,
+    fontWeight: Typography.semiBold,
+    color: Colors.gray900,
+  },
+  numKeySymbol: {
+    color: Colors.gray500,
+  },
+  numKeyCheckText: {
+    color: Colors.white,
+  },
 });
