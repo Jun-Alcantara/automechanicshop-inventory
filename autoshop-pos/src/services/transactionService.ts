@@ -169,6 +169,18 @@ export const observeTransactionsForCustomer = (customerId: string) =>
     )
     .observe();
 
+/**
+ * Observable for all transactions linked to a specific vehicle,
+ * sorted newest first. Used on the vehicle detail screen.
+ */
+export const observeTransactionsForVehicle = (vehicleId: string) =>
+  database.get<TransactionModel>('transactions')
+    .query(
+      Q.where('vehicle_id', vehicleId),
+      Q.sortBy('created_at', Q.desc)
+    )
+    .observe();
+
 // ─── Transaction Lifecycle ────────────────────────────────────────────────────
 
 /**
