@@ -11,17 +11,15 @@ import type { RootStackParamList } from '@navigation/types';
 type Nav = StackNavigationProp<RootStackParamList, 'PinLock'>;
 
 const PIN_LENGTH = 6;
-const KEY_SIZE = 76;
-const KEY_GAP = 14;
 
-const NUMPAD_KEYS = [
-  '1', '2', '3',
-  '4', '5', '6',
-  '7', '8', '9',
-  'backspace', '0', 'check',
+const NUMPAD_ROWS = [
+  ['1', '2', '3'],
+  ['4', '5', '6'],
+  ['7', '8', '9'],
+  ['backspace', '0', 'check'],
 ] as const;
 
-type NumpadKey = typeof NUMPAD_KEYS[number];
+type NumpadKey = 'backspace' | 'check' | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9';
 
 export const PinLockScreen: React.FC = () => {
   const navigation = useNavigation<Nav>();
@@ -107,63 +105,72 @@ export const PinLockScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.appName}>AutoShop POS</Text>
-
-      {isLocked && user ? (
-        <Text style={styles.lockedLabel}>
-          {'Session locked.\n'}
-          <Text style={styles.lockedUser}>{user.displayName}</Text>
-        </Text>
-      ) : (
-        <Text style={styles.subtitle}>Enter your PIN to continue</Text>
-      )}
-
-      {/* PIN digit boxes */}
-      <View style={styles.pinRow}>
-        {Array.from({ length: PIN_LENGTH }).map((_, i) => (
-          <View
-            key={i}
-            style={[
-              styles.pinBox,
-              i < pin.length && styles.pinBoxFilled,
-              !!error && styles.pinBoxError,
-            ]}
-          >
-            {i < pin.length && <View style={styles.pinDot} />}
-          </View>
-        ))}
+      {/* App name — takes up remaining space, centered */}
+      <View style={styles.header}>
+        <Text style={styles.appName}>AutoShop POS</Text>
       </View>
 
-      {error ? <Text style={styles.errorText}>{error}</Text> : <View style={styles.errorPlaceholder} />}
+      {/* PIN section — sits just above the numpad */}
+      <View style={styles.pinSection}>
+        {isLocked && user ? (
+          <Text style={styles.lockedLabel}>
+            {'Session locked.\n'}
+            <Text style={styles.lockedUser}>{user.displayName}</Text>
+          </Text>
+        ) : (
+          <Text style={styles.subtitle}>Enter your PIN to continue</Text>
+        )}
 
-      {/* Numpad 3 x 4 */}
-      <View style={styles.numpad}>
-        {NUMPAD_KEYS.map(key => {
-          const isCheck = key === 'check';
-          const isBackspace = key === 'backspace';
-          return (
-            <TouchableOpacity
-              key={key}
+        <View style={styles.pinRow}>
+          {Array.from({ length: PIN_LENGTH }).map((_, i) => (
+            <View
+              key={i}
               style={[
-                styles.numKey,
-                isCheck && styles.numKeyCheck,
-                isBackspace && styles.numKeyBackspace,
-                loading && styles.numKeyDisabled,
+                styles.pinBox,
+                i < pin.length && styles.pinBoxFilled,
+                !!error && styles.pinBoxError,
               ]}
-              onPress={() => handleKeyPress(key)}
-              disabled={loading}
-              activeOpacity={0.65}
             >
-              {isBackspace ? (
-                <Text style={[styles.numKeyText, styles.numKeySymbol]}>⌫</Text>
-              ) : isCheck ? (
-                <Text style={[styles.numKeyText, styles.numKeyCheckText]}>✓</Text>
-              ) : (
-                <Text style={styles.numKeyText}>{key}</Text>
-              )}
-            </TouchableOpacity>
-          );
-        })}
+              {i < pin.length && <View style={styles.pinDot} />}
+            </View>
+          ))}
+        </View>
+
+        {error ? <Text style={styles.errorText}>{error}</Text> : <View style={styles.errorPlaceholder} />}
+      </View>
+
+      {/* Numpad — anchored to bottom with gray container */}
+      <View style={styles.numpadContainer}>
+        {NUMPAD_ROWS.map((row, rowIdx) => (
+          <View key={rowIdx} style={styles.numpadRow}>
+            {row.map(key => {
+              const isCheck = key === 'check';
+              const isBackspace = key === 'backspace';
+              return (
+                <TouchableOpacity
+                  key={key}
+                  style={[
+                    styles.numKey,
+                    isCheck && styles.numKeyCheck,
+                    isBackspace && styles.numKeyBackspace,
+                    loading && styles.numKeyDisabled,
+                  ]}
+                  onPress={() => handleKeyPress(key as NumpadKey)}
+                  disabled={loading}
+                  activeOpacity={0.65}
+                >
+                  {isBackspace ? (
+                    <Text style={[styles.numKeyText, styles.numKeySymbol]}>⌫</Text>
+                  ) : isCheck ? (
+                    <Text style={[styles.numKeyText, styles.numKeyCheckText]}>✓</Text>
+                  ) : (
+                    <Text style={styles.numKeyText}>{key}</Text>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        ))}
       </View>
     </View>
   );
@@ -173,45 +180,55 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+
+  // App name fills the top space
+  header: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: Spacing.xl,
   },
   appName: {
     fontSize: Typography.xxxl,
     fontWeight: Typography.bold,
     color: Colors.primary,
-    marginBottom: Spacing.xl,
+  },
+
+  // Label + PIN boxes just above the numpad
+  pinSection: {
+    alignItems: 'center',
+    paddingHorizontal: Spacing.md,
+    paddingBottom: Spacing.sm,
   },
   subtitle: {
     fontSize: Typography.base,
     color: Colors.gray500,
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
   },
   lockedLabel: {
     fontSize: Typography.base,
     color: Colors.gray500,
     textAlign: 'center',
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
   },
   lockedUser: {
     fontWeight: Typography.semiBold,
     color: Colors.gray900,
   },
 
-  // PIN boxes
+  // PIN boxes — flex to fill width
   pinRow: {
     flexDirection: 'row',
-    gap: Spacing.sm,
-    marginBottom: Spacing.sm,
+    gap: 10,
+    width: '100%',
   },
   pinBox: {
-    width: 54,
-    height: 62,
-    borderRadius: BorderRadius.md,
-    borderWidth: 2,
+    flex: 1,
+    height: 52,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1.5,
     borderColor: Colors.border,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.gray100,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -224,50 +241,57 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dangerLight,
   },
   pinDot: {
-    width: 15,
-    height: 15,
+    width: 12,
+    height: 12,
     borderRadius: BorderRadius.full,
     backgroundColor: Colors.primary,
   },
   errorText: {
     fontSize: Typography.sm,
     color: Colors.danger,
-    marginBottom: Spacing.md,
+    marginTop: Spacing.sm,
     textAlign: 'center',
   },
   errorPlaceholder: {
-    height: Typography.sm + Spacing.md,
+    height: Typography.sm + Spacing.sm,
   },
 
-  // Numpad
-  numpad: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    width: KEY_SIZE * 3 + KEY_GAP * 2,
-    gap: KEY_GAP,
+  // Numpad container — gray background, full width, bottom-anchored
+  numpadContainer: {
+    backgroundColor: Colors.gray100,
+    paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.xl,
+    gap: Spacing.sm,
   },
+  numpadRow: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+
+  // Individual keys — flex: 1 fills each row equally
   numKey: {
-    width: KEY_SIZE,
-    height: KEY_SIZE,
-    borderRadius: BorderRadius.lg,
-    backgroundColor: Colors.surface,
+    flex: 1,
+    height: 72,
+    borderRadius: 18,
+    backgroundColor: Colors.white,
     borderWidth: 1,
     borderColor: Colors.border,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: Colors.black,
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 2,
-    elevation: 1,
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
   },
   numKeyCheck: {
     backgroundColor: Colors.primary,
     borderColor: Colors.primary,
   },
   numKeyBackspace: {
-    backgroundColor: Colors.gray100,
-    borderColor: Colors.border,
+    backgroundColor: Colors.gray300,
+    borderColor: Colors.gray300,
   },
   numKeyDisabled: {
     opacity: 0.45,
@@ -278,7 +302,7 @@ const styles = StyleSheet.create({
     color: Colors.gray900,
   },
   numKeySymbol: {
-    color: Colors.gray500,
+    color: Colors.gray700,
   },
   numKeyCheckText: {
     color: Colors.white,
